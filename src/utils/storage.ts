@@ -6,12 +6,14 @@ export interface Gallery {
   photos: string[];
   createdAt: number;
   bgGradient?: { from: string, to: string };
+  bgImage?: string;
+  bgOpacity?: number;
 }
 
-export async function saveGallery(name: string, photos: string[], bgGradient?: { from: string, to: string }, id?: string): Promise<Gallery> {
+export async function saveGallery(name: string, photos: string[], bgGradient?: { from: string, to: string }, id?: string, bgImage?: string, bgOpacity?: number): Promise<Gallery> {
   const galleries = await getSavedGalleries();
   const galleryId = id || Date.now().toString();
-  const newGallery: Gallery = { id: galleryId, name, photos, createdAt: Date.now(), bgGradient };
+  const newGallery: Gallery = { id: galleryId, name, photos, createdAt: Date.now(), bgGradient, bgImage, bgOpacity };
   
   if (id) {
     const index = galleries.findIndex(g => g.id === id);

@@ -21,7 +21,25 @@ export default function CreateGalleryScreen({ onStart, onClose, initialGallery }
   const [name, setName] = useState(initialGallery?.name || '');
   const [photos, setPhotos] = useState<string[]>(initialGallery?.photos || []);
   const [bgGradient, setBgGradient] = useState(initialGallery?.bgGradient || GRADIENTS[0]);
+  const [bgImage, setBgImage] = useState<string | undefined>(initialGallery?.bgImage);
+  const [bgOpacity, setBgOpacity] = useState<number>(initialGallery?.bgOpacity ?? 0.5);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bgInputRef = useRef<HTMLInputElement>(null);
+
+  const handleBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    const file = files[0];
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setBgImage(event.target.result as string);
+      }
+    };
+    reader.readAsDataURL(file);
+    if (bgInputRef.current) bgInputRef.current.value = '';
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -95,14 +113,16 @@ export default function CreateGalleryScreen({ onStart, onClose, initialGallery }
 
     let finalGallery: Gallery;
     if (save) {
-      finalGallery = await saveGallery(galleryName, photos, bgGradient, initialGallery?.id);
+      finalGallery = await saveGallery(galleryName, photos, bgGradient, initialGallery?.id, bgImage, bgOpacity);
     } else {
       finalGallery = {
         id: initialGallery?.id || 'temp-' + Date.now(),
         name: galleryName,
         photos,
         createdAt: Date.now(),
-        bgGradient
+        bgGradient,
+        bgImage,
+        bgOpacity
       };
     }
     
@@ -139,7 +159,7 @@ export default function CreateGalleryScreen({ onStart, onClose, initialGallery }
 
         <div className="bg-white p-8 rounded-3xl shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] border border-gray-100">
           <label className="block text-[10px] font-medium text-gray-400 mb-6 uppercase tracking-widest">Background Vibe</label>
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-4 mb-8">
             {GRADIENTS.map((grad, i) => (
               <button
                 key={i}
@@ -149,6 +169,55 @@ export default function CreateGalleryScreen({ onStart, onClose, initialGallery }
                 title={grad.name}
               />
             ))}
+          </div>
+
+          <div className="border-t border-gray-100 pt-8">
+            <label className="block text-[10px] font-medium text-gray-400 mb-4 uppercase tracking-widest">Custom Background Image</label>
+            <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
+              <div className="flex gap-4 items-center">
+                <input 
+                  type="file" 
+                  ref={bgInputRef} 
+                  accept="image/*" 
+                  className="hidden" 
+                  onChange={handleBgUpload} 
+                />
+                <button 
+                  onClick={() => bgInputRef.current?.click()}
+                  className="flex items-center gap-2 text-[10px] text-black bg-gray-50 hover:bg-gray-100 transition-colors uppercase tracking-widest px-4 py-2.5 rounded-full"
+                >
+                  <ImageIcon className="w-4 h-4" /> 
+                  {bgImage ? 'Change Image' : 'Upload Image'}
+                </button>
+                {bgImage && (
+                  <button 
+                    onClick={() => setBgImage(undefined)}
+                    className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors rounded-full"
+                    title="Remove background"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+              
+              {bgImage && (
+                <div className="flex-1 w-full max-w-xs">
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="text-[10px] text-gray-500 uppercase tracking-widest">Transparency</label>
+                    <span className="text-[10px] font-mono text-gray-400">{Math.round(bgOpacity * 100)}%</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="1" 
+                    step="0.05"
+                    value={bgOpacity}
+                    onChange={(e) => setBgOpacity(parseFloat(e.target.value))}
+                    className="w-full accent-black h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
