@@ -63,6 +63,7 @@ export default function App() {
               <LocationDetailsScreen 
                 key="location-details"
                 data={selectedCard} 
+                gallery={currentGallery}
                 onClose={() => setSelectedCard(null)} 
               />
             )}
@@ -77,7 +78,7 @@ export default function App() {
             >
               <button 
                 onClick={() => setCurrentGallery(null)}
-                className="px-6 py-3 bg-white/10 backdrop-blur-md border border-white/20 text-[10px] text-white hover:bg-white/20 tracking-widest uppercase transition-all rounded-full mix-blend-difference shadow-sm hover:-translate-y-0.5"
+                className="px-6 py-3 bg-white backdrop-blur-md border border-black/10 text-[10px] text-black hover:bg-gray-100 tracking-widest uppercase transition-all rounded-full shadow-lg hover:-translate-y-0.5 font-medium"
               >
                 BACK TO GALLERIES
               </button>
